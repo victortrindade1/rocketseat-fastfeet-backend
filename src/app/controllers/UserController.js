@@ -10,18 +10,23 @@ class UserController {
       if (userExists) {
         return res.status(400).json({ error: 'User already exists.' });
       }
-    } catch (error) {
+    } catch (err) {
       // console.log(error);
-      return res.status(400).json({ error: 'Error in await User.findOne().' });
+      return res.status(400).json({ error: 'Erro ao buscar no banco' });
     }
 
-    const { id, name, email } = await User.create(req.body);
+    // Insere na tabela
+    try {
+      const { id, name, email } = await User.create(req.body);
 
-    return res.json({
-      id,
-      name,
-      email,
-    });
+      return res.json({
+        id,
+        name,
+        email,
+      });
+    } catch (err) {
+      return res.status(400).json({ error: 'Erro ao inserir no banco' });
+    }
   }
 }
 
