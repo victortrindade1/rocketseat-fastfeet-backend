@@ -8,7 +8,8 @@ class SessionController {
 
     /**
      * Se eu declarar const user, eu somente poderei usar dentro do escopo do
-     * try{}. Pra acessar fora do escopo, eu declaro com let fora do escopo.
+     * primeiro try{}. Pra acessar fora deste escopo, eu declaro com let fora do
+     * try{}.
      */
     let user;
 
