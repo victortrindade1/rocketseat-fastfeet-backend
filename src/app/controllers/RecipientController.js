@@ -32,7 +32,6 @@ class RecipientController {
         return res.status(400).json({ error: 'Recipient already exists.' });
       }
     } catch (err) {
-      console.log(err);
       return res.status(400).json({ error: 'Error when searching in DB' });
     }
 
@@ -63,6 +62,38 @@ class RecipientController {
       });
     } catch (err) {
       return res.status(400).json({ error: 'Erro ao inserir no banco' });
+    }
+  }
+
+  async update(req, res) {
+    // Validação: body do request
+    const schema = Yup.object().shape({
+      name: Yup.string(),
+      phone: Yup.string(),
+      street: Yup.string(),
+      number: Yup.string(),
+      complement: Yup.string(),
+      state: Yup.string(),
+      city: Yup.string(),
+      zipcode: Yup.string(),
+    });
+
+    if (!(await schema.isValid(req.body))) {
+      return res.status(400).json({ error: 'Validation fails' });
+    }
+
+    try {
+      const recipient = await Recipient.findByPk(req.params.id);
+
+      if (!recipient) {
+        return res.status(400).json({ error: 'Recipient not found' });
+      }
+
+      await recipient.update(req.body);
+
+      return res.json(recipient);
+    } catch (err) {
+      return res.status(400).json({ error: 'Error in update' });
     }
   }
 }
