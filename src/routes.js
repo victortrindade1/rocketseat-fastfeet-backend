@@ -26,19 +26,20 @@ routes.post('/recipients', RecipientController.store);
 routes.put('/recipients/:id', RecipientController.update);
 
 /**
- * Gestão de Entregadores (Couriers)
+ * Entregadores (Couriers)
  */
-// Avatar
+routes.get('/couriers', CourierController.index);
+routes.post('/couriers', CourierController.store);
+routes.delete('/couriers/:id', CourierController.delete);
+routes.put('/couriers/:id', CourierController.update);
+
+/**
+ * Avatar de Entregadores
+ */
 routes.post(
   '/couriers/avatar',
   upload.single('file'),
   CourierAvatarController.store
 );
-
-// Lista de entregadores
-routes.get('/couriers', CourierController.index);
-
-// Cadastro de entregador
-routes.post('/couriers', CourierController.store);
 
 export default routes;

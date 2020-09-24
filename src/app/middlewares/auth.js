@@ -4,7 +4,6 @@ import jwt from 'jsonwebtoken';
 import authConfig from '../../config/auth';
 
 export default async (req, res, next) => {
-  console.log(req);
   const authHeader = req.headers.authorization;
 
   if (!authHeader) {
