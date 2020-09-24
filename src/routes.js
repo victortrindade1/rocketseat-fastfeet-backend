@@ -5,8 +5,8 @@ import multerConfig from './config/multer';
 import UserController from './app/controllers/UserController';
 import SessionController from './app/controllers/SessionController';
 import RecipientController from './app/controllers/RecipientController';
-import CourierAvatarController from './app/controllers/CourierAvatarController';
-import CourierController from './app/controllers/CourierController';
+import DeliverymanAvatarController from './app/controllers/DeliverymanAvatarController';
+import DeliverymanController from './app/controllers/DeliverymanController';
 
 import authMiddleware from './app/middlewares/auth';
 
@@ -26,20 +26,20 @@ routes.post('/recipients', RecipientController.store);
 routes.put('/recipients/:id', RecipientController.update);
 
 /**
- * Entregadores (Couriers)
+ * Entregadores (Deliverymen)
  */
-routes.get('/couriers', CourierController.index);
-routes.post('/couriers', CourierController.store);
-routes.delete('/couriers/:id', CourierController.delete);
-routes.put('/couriers/:id', CourierController.update);
+routes.get('/deliverymen', DeliverymanController.index);
+routes.post('/deliverymen', DeliverymanController.store);
+routes.delete('/deliverymen/:id', DeliverymanController.delete);
+routes.put('/deliverymen/:id', DeliverymanController.update);
 
 /**
  * Avatar de Entregadores
  */
 routes.post(
-  '/couriers/avatar',
+  '/deliverymen/avatar',
   upload.single('file'),
-  CourierAvatarController.store
+  DeliverymanAvatarController.store
 );
 
 export default routes;

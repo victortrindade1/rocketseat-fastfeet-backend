@@ -1,8 +1,15 @@
 Desafio 1 concluído.
 
-O q estou fazendo:
+Desafio 2 - gestão de entregadores concluído.
 
-criei duas migrations pra duas novas tabelas: couriers e courier_avatar.
+Estou em: gestão de encomendas
 
-Ainda não migrou. Acredito q seja pq ainda não criei os models e não atualizei
-o pai dos models.
+criar tabela signatures OK
+criar tabela packages OK
+Renomear Courier para Deliveryman OK
+Renomear Package para Delivery OK
+
+O q vou fazer agora:
+
+O CRUD do Delivery é separado, apenas pra cadastrar encomendas. Vai ter um
+controller só pro lance do start_date, end_date.

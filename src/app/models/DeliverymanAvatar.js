@@ -1,6 +1,6 @@
 import Sequelize, { Model } from 'sequelize';
 
-class CourierAvatar extends Model {
+class DeliverymanAvatar extends Model {
   static init(sequelize) {
     super.init(
       {
@@ -9,6 +9,7 @@ class CourierAvatar extends Model {
         url: {
           type: Sequelize.VIRTUAL,
           get() {
+            // return `${process.env.APP_URL}/files/${this.path}`;
             return `http://localhost:3333/files/${this.path}`;
           },
         },
@@ -22,4 +23,4 @@ class CourierAvatar extends Model {
   }
 }
 
-export default CourierAvatar;
+export default DeliverymanAvatar;

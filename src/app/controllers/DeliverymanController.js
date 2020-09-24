@@ -1,30 +1,30 @@
 /**
- * Gestão de Couriers (Entregadores) - CRUD
+ * Gestão de deliverymen (Entregadores) - CRUD
  */
 import * as Yup from 'yup';
-import Courier from '../models/Courier';
-import CourierAvatar from '../models/CourierAvatar';
+import Deliveryman from '../models/Deliveryman';
+import DeliverymanAvatar from '../models/DeliverymanAvatar';
 
-class CourierController {
+class DeliverymanController {
   async index(req, res) {
     try {
       const { page = 1 } = req.query;
 
-      const couriers = await Courier.findAll({
+      const deliverymen = await Deliveryman.findAll({
         // Os campos q eu quero q mostre ficam em "attributes"
         attributes: ['id', 'name', 'email', 'avatar_id'],
         limit: 20,
         offset: (page - 1) * 20,
         include: [
           {
-            model: CourierAvatar,
+            model: DeliverymanAvatar,
             as: 'avatar',
             attributes: ['name', 'path', 'url'],
           },
         ],
       });
 
-      return res.json(couriers);
+      return res.json(deliverymen);
     } catch (error) {
       return res.status(400).json({ error: 'Error in database.' });
     }
@@ -43,16 +43,16 @@ class CourierController {
         return res.status(400).json({ error: 'Validation fails' });
       }
 
-      const courierExists = await Courier.findOne({
+      const deliverymanExists = await Deliveryman.findOne({
         where: { email: req.body.email },
       });
 
-      if (courierExists) {
-        return res.status(400).json({ error: 'Courier already exists.' });
+      if (deliverymanExists) {
+        return res.status(400).json({ error: 'Deliveryman already exists.' });
       }
 
-      // Em vez de carregar na response todos os dados de Courier, eu escolho carregar estes 4
-      const { id, name, email } = await Courier.create(req.body);
+      // Em vez de carregar na response todos os dados de Deliveryman, eu escolho carregar estes 4
+      const { id, name, email } = await Deliveryman.create(req.body);
 
       return res.json({
         id,
@@ -68,16 +68,18 @@ class CourierController {
     try {
       const { id } = req.params;
 
-      const courier = await Courier.findByPk(id);
+      const deliveryman = await Deliveryman.findByPk(id);
 
-      if (!courier) {
-        return res.status(400).json({ error: 'Courier does not exist.' });
+      if (!deliveryman) {
+        return res.status(400).json({ error: 'Deliveryman does not exist.' });
       }
 
       // Poderia, em vez de destruir, criar uma coluna com canceled_at
-      await Courier.destroy({ where: { id } });
+      await Deliveryman.destroy({ where: { id } });
 
-      return res.status(200).json({ message: 'Courier deleted successfully.' });
+      return res
+        .status(200)
+        .json({ message: 'Deliveryman deleted successfully.' });
     } catch (err) {
       return res.status(400).json({ error: 'Error in database.' });
     }
@@ -96,19 +98,19 @@ class CourierController {
         return res.status(400).json({ error: 'Validation fails' });
       }
 
-      const courier = await Courier.findByPk(req.params.id);
+      const deliveryman = await Deliveryman.findByPk(req.params.id);
 
-      if (!courier) {
-        return res.status(400).json({ error: 'Courier not found' });
+      if (!deliveryman) {
+        return res.status(400).json({ error: 'Deliveryman not found' });
       }
 
-      await courier.update(req.body);
+      await deliveryman.update(req.body);
 
-      return res.json(courier);
+      return res.json(deliveryman);
     } catch (err) {
       return res.status(400).json({ error: 'Error in update' });
     }
   }
 }
 
-export default new CourierController();
+export default new DeliverymanController();

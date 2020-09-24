@@ -2,12 +2,21 @@ import Sequelize from 'sequelize';
 
 import User from '../app/models/User';
 import Recipient from '../app/models/Recipient';
-import Courier from '../app/models/Courier';
-import CourierAvatar from '../app/models/CourierAvatar';
+import Deliveryman from '../app/models/Deliveryman';
+import DeliverymanAvatar from '../app/models/DeliverymanAvatar';
+import Delivery from '../app/models/Delivery';
+import Signature from '../app/models/Signature';
 
 import databaseConfig from '../config/database';
 
-const models = [User, Recipient, Courier, CourierAvatar];
+const models = [
+  User,
+  Recipient,
+  Deliveryman,
+  DeliverymanAvatar,
+  Delivery,
+  Signature,
+];
 
 class Database {
   constructor() {
