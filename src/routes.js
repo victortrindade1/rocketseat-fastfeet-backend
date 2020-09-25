@@ -47,8 +47,8 @@ routes.post(
  * Encomendas (Deliveries)
  */
 routes.get('/deliveries', DeliveryController.index);
-// routes.post('/deliveries', DeliveryController.store);
-// routes.delete('/deliveries/:id', DeliveryController.delete);
+routes.post('/deliveries', DeliveryController.store);
+routes.delete('/deliveries/:id', DeliveryController.delete);
 // routes.put('/deliveries/:id', DeliveryController.update);
 
 export default routes;

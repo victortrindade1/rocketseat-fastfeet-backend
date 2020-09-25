@@ -1,7 +1,7 @@
 /**
- * Gestão de deliverymen (Entregadores) - CRUD
+ * Gestão de deliveries (Encomendas) - CRUD
  */
-// import * as Yup from 'yup';
+import * as Yup from 'yup';
 import Delivery from '../models/Delivery';
 import Recipient from '../models/Recipient';
 import Deliveryman from '../models/Deliveryman';
@@ -43,60 +43,69 @@ class DeliveryController {
     }
   }
 
-  // async store(req, res) {
-  //   try {
-  //     // Validação: body do request
-  //     const schema = Yup.object().shape({
-  //       name: Yup.string().required(),
-  //       email: Yup.string().email().required(),
-  //       avatar_id: Yup.number(),
-  //     });
+  async store(req, res) {
+    try {
+      // Validação: body do request
+      const schema = Yup.object().shape({
+        product: Yup.string().required(),
+        recipient_id: Yup.number().required(),
+        deliveryman_id: Yup.number().required(),
+      });
 
-  //     if (!(await schema.isValid(req.body))) {
-  //       return res.status(400).json({ error: 'Validation fails' });
-  //     }
+      if (!(await schema.isValid(req.body))) {
+        return res.status(400).json({ error: 'Validation fails' });
+      }
 
-  //     const deliverymanExists = await Deliveryman.findOne({
-  //       where: { email: req.body.email },
-  //     });
+      // Check if recipient and deliveryman exists
+      const recipientExists = await Recipient.findByPk(req.body.recipient_id);
 
-  //     if (deliverymanExists) {
-  //       return res.status(400).json({ error: 'Deliveryman already exists.' });
-  //     }
+      const deliverymanExists = await Deliveryman.findByPk(
+        req.body.deliveryman_id
+      );
 
-  //     // Em vez de carregar na response todos os dados de Deliveryman, eu escolho carregar estes 4
-  //     const { id, name, email } = await Deliveryman.create(req.body);
+      if (!(recipientExists || deliverymanExists)) {
+        return res
+          .status(400)
+          .json({ error: 'Recipient and/or Deliveryman do not exist.' });
+      }
 
-  //     return res.json({
-  //       id,
-  //       name,
-  //       email,
-  //     });
-  //   } catch (error) {
-  //     return res.status(400).json({ error: 'Error in database.' });
-  //   }
-  // }
+      const {
+        id,
+        product,
+        recipient_id,
+        deliveryman_id,
+      } = await Delivery.create(req.body);
 
-  // async delete(req, res) {
-  //   try {
-  //     const { id } = req.params;
+      return res.json({
+        id,
+        product,
+        recipient_id,
+        deliveryman_id,
+      });
+    } catch (error) {
+      return res.status(400).json({ error: 'Error in database.' });
+    }
+  }
 
-  //     const deliveryman = await Deliveryman.findByPk(id);
+  async delete(req, res) {
+    try {
+      const { id } = req.params;
 
-  //     if (!deliveryman) {
-  //       return res.status(400).json({ error: 'Deliveryman does not exist.' });
-  //     }
+      const delivery = await Delivery.findByPk(id);
 
-  //     // Poderia, em vez de destruir, criar uma coluna com canceled_at
-  //     await Deliveryman.destroy({ where: { id } });
+      if (!delivery) {
+        return res.status(400).json({ error: 'Delivery does not exist.' });
+      }
 
-  //     return res
-  //       .status(200)
-  //       .json({ message: 'Deliveryman deleted successfully.' });
-  //   } catch (err) {
-  //     return res.status(400).json({ error: 'Error in database.' });
-  //   }
-  // }
+      await Delivery.destroy({ where: { id } });
+
+      return res
+        .status(200)
+        .json({ message: 'Delivery deleted successfully.' });
+    } catch (err) {
+      return res.status(400).json({ error: 'Error in database.' });
+    }
+  }
 
   // async update(req, res) {
   //   try {
