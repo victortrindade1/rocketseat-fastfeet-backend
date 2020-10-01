@@ -2,6 +2,9 @@
  * Gestão de deliverymen (Entregadores) - CRUD
  */
 import * as Yup from 'yup';
+import { Op } from 'sequelize';
+
+import Delivery from '../models/Delivery';
 import Deliveryman from '../models/Deliveryman';
 import DeliverymanAvatar from '../models/DeliverymanAvatar';
 
@@ -89,12 +92,16 @@ class DeliverymanController {
     try {
       // Validação: body do request
       const schema = Yup.object().shape({
+        id: Yup.number().required(),
         name: Yup.string(),
         email: Yup.string().email(),
         avatar_id: Yup.number(),
       });
 
-      if (!(await schema.isValid(req.body))) {
+      const request = req.body;
+      request.id = req.params.id;
+
+      if (!(await schema.isValid(request))) {
         return res.status(400).json({ error: 'Validation fails' });
       }
 
@@ -109,6 +116,59 @@ class DeliverymanController {
       return res.json(deliveryman);
     } catch (err) {
       return res.status(400).json({ error: 'Error in update' });
+    }
+  }
+
+  async show(req, res) {
+    try {
+      // Validação: params
+      const schema = Yup.object().shape({
+        id: Yup.number().required(),
+      });
+
+      const { id } = req.params;
+
+      if (!(await schema.isValid({ id }))) {
+        return res.status(400).json({ error: 'Validation fails' });
+      }
+
+      // Validation: deliveryman exists
+      const deliverymanExists = await Deliveryman.findByPk(id);
+
+      if (!deliverymanExists) {
+        return res.status(400).json({ error: 'Deliveryman does not exist.' });
+      }
+
+      const deliveries = await Delivery.findAll({
+        where: {
+          deliveryman_id: id,
+          canceled_at: {
+            [Op.is]: null,
+          },
+          end_date: {
+            [Op.is]: null,
+          },
+        },
+        attributes: ['id', 'product', 'start_date'],
+        include: [
+          {
+            model: Deliveryman,
+            as: 'deliveryman',
+            attributes: ['id', 'name', 'email'],
+            include: [
+              {
+                model: DeliverymanAvatar,
+                as: 'avatar',
+                attributes: ['id', 'path', 'url'],
+              },
+            ],
+          },
+        ],
+      });
+
+      return res.status(200).json(deliveries);
+    } catch (error) {
+      return res.status(400).json({ error: 'Error in database' });
     }
   }
 }

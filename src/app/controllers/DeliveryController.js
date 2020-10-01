@@ -107,32 +107,64 @@ class DeliveryController {
     }
   }
 
-  // async update(req, res) {
-  //   try {
-  //     // Validação: body do request
-  //     const schema = Yup.object().shape({
-  //       name: Yup.string(),
-  //       email: Yup.string().email(),
-  //       avatar_id: Yup.number(),
-  //     });
+  async update(req, res) {
+    try {
+      // Validação: body do request
+      const schema = Yup.object().shape({
+        product: Yup.string(),
+        recipient_id: Yup.number(),
+        deliveryman_id: Yup.number(),
+        id: Yup.number().required(),
+        // end_date: Yup.date(),
+        // // If has end_date, then requires signature_id
+        // signature_id: Yup.number().when('end_date', (end_date, field) =>
+        //   end_date ? field.required() : field
+        // ),
+      });
 
-  //     if (!(await schema.isValid(req.body))) {
-  //       return res.status(400).json({ error: 'Validation fails' });
-  //     }
+      const { product, recipient_id, deliveryman_id } = req.body;
+      const { id } = req.params;
 
-  //     const deliveryman = await Deliveryman.findByPk(req.params.id);
+      const deliveryRequest = { id, product, recipient_id, deliveryman_id };
 
-  //     if (!deliveryman) {
-  //       return res.status(400).json({ error: 'Deliveryman not found' });
-  //     }
+      if (!(await schema.isValid(deliveryRequest))) {
+        return res.status(400).json({ error: 'Validation fails' });
+      }
 
-  //     await deliveryman.update(req.body);
+      // Validation: delivery exists?
+      const delivery = await Delivery.findByPk(id);
 
-  //     return res.json(deliveryman);
-  //   } catch (err) {
-  //     return res.status(400).json({ error: 'Error in update' });
-  //   }
-  // }
+      if (!delivery) {
+        return res.status(400).json({ error: 'Delivery not found' });
+      }
+
+      // Validation: recipient and deliveryman exist?
+      // const { recipient_id, deliveryman_id } = req.body;
+
+      if (recipient_id) {
+        const recipientExists = await Recipient.findByPk(recipient_id);
+
+        if (!recipientExists) {
+          return res.status(400).json({ error: 'Recipient not found' });
+        }
+      }
+
+      if (deliveryman_id) {
+        const deliverymanExists = await Deliveryman.findByPk(deliveryman_id);
+
+        if (!deliverymanExists) {
+          return res.status(400).json({ error: 'Deliveryman not found' });
+        }
+      }
+
+      // Update Delivery
+      await delivery.update(req.body);
+
+      return res.json(delivery);
+    } catch (err) {
+      return res.status(400).json({ error: 'Error in update' });
+    }
+  }
 }
 
 export default new DeliveryController();

@@ -68,6 +68,7 @@ class RecipientController {
   async update(req, res) {
     // Validação: body do request
     const schema = Yup.object().shape({
+      id: Yup.number().required(),
       name: Yup.string(),
       phone: Yup.string(),
       street: Yup.string(),
@@ -78,7 +79,10 @@ class RecipientController {
       zipcode: Yup.string(),
     });
 
-    if (!(await schema.isValid(req.body))) {
+    const requestObj = req.body;
+    requestObj.id = req.params.id;
+
+    if (!(await schema.isValid(requestObj))) {
       return res.status(400).json({ error: 'Validation fails' });
     }
 
