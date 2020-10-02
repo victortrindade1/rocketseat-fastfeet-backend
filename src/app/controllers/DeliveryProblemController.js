@@ -2,9 +2,12 @@
  * CRUD - delivery problems
  */
 import * as Yup from 'yup';
+import { Op } from 'sequelize';
 
 import Delivery from '../models/Delivery';
 import DeliveryProblem from '../models/DeliveryProblem';
+import Deliveryman from '../models/Deliveryman';
+import Recipient from '../models/Recipient';
 
 class DeliveryProblemController {
   async store(req, res) {
@@ -48,6 +51,56 @@ class DeliveryProblemController {
         error: 'Error in database. Sorry.',
         // description: error.message,
       });
+    }
+  }
+
+  async index(req, res) {
+    try {
+      // Eu poderia fazer dinâmico com filtro de deliveries opened e closed
+      // List all deliveries that have problem
+
+      const { page = 1 } = req.query;
+
+      const deliveriesProblems = await DeliveryProblem.findAll({
+        attributes: ['id', 'description'],
+        limit: 20,
+        offset: (page - 1) * 20,
+        include: [
+          {
+            model: Delivery,
+            as: 'delivery',
+            attributes: ['id', 'product', 'start_date'],
+            where: {
+              end_date: {
+                [Op.is]: null,
+              },
+            },
+            include: [
+              {
+                model: Recipient,
+                as: 'recipient',
+                attributes: ['id', 'name', 'city'],
+              },
+              {
+                model: Deliveryman,
+                as: 'deliveryman',
+                attributes: ['id', 'name', 'email'],
+              },
+            ],
+          },
+        ],
+      });
+
+      if (
+        typeof deliveriesProblems !== 'undefined' &&
+        deliveriesProblems.length === 0
+      ) {
+        return res.json({ message: ' No deliveries with problems found' });
+      }
+
+      return res.status(200).json(deliveriesProblems);
+    } catch (error) {
+      return res.status(400).json({ error: 'Database error' });
     }
   }
 }

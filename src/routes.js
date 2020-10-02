@@ -26,6 +26,11 @@ routes.post('/sessions', SessionController.store);
 /**
  * Relatar problemas com encomendas abertas
  */
+routes.get(
+  '/delivery/all/problems',
+  authMiddleware,
+  DeliveryProblemController.index
+);
 routes.post('/delivery/:delivery_id/problems', DeliveryProblemController.store);
 
 /**
