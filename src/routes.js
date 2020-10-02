@@ -9,6 +9,7 @@ import DeliverymanAvatarController from './app/controllers/DeliverymanAvatarCont
 import DeliverymanController from './app/controllers/DeliverymanController';
 import DeliveryController from './app/controllers/DeliveryController';
 import StatusDeliveryController from './app/controllers/StatusDeliveryController';
+import DeliveryProblemController from './app/controllers/DeliveryProblemController';
 
 import authMiddleware from './app/middlewares/auth';
 
@@ -21,6 +22,11 @@ routes.get('/', (req, res) => {
 
 routes.post('/users', UserController.store);
 routes.post('/sessions', SessionController.store);
+
+/**
+ * Relatar problemas com encomendas abertas
+ */
+routes.post('/delivery/:delivery_id/problems', DeliveryProblemController.store);
 
 /**
  * Status do delivery
