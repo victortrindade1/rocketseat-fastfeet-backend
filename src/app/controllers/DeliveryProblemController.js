@@ -92,6 +92,7 @@ class DeliveryProblemController {
       });
 
       if (
+        // If Empty Array
         typeof deliveriesProblems !== 'undefined' &&
         deliveriesProblems.length === 0
       ) {
@@ -101,6 +102,82 @@ class DeliveryProblemController {
       return res.status(200).json(deliveriesProblems);
     } catch (error) {
       return res.status(400).json({ error: 'Database error' });
+    }
+  }
+
+  async show(req, res) {
+    try {
+      const deliveryId = req.params.delivery_id;
+
+      const schema = Yup.object().shape({
+        deliveryId: Yup.number().required(),
+      });
+
+      if (!(await schema.isValid({ deliveryId }))) {
+        return res.status(400).json({ error: 'Validation fails.' });
+      }
+
+      // Validation: deliveryId is valid?
+      const deliveryExists = await Delivery.findByPk(deliveryId);
+
+      if (!deliveryExists) {
+        return res.status(400).json({ error: 'Delivery not found' });
+      }
+
+      const deliveryProblems = await DeliveryProblem.findAll({
+        where: {
+          delivery_id: deliveryId,
+        },
+        attributes: ['id', 'description'],
+      });
+
+      return res.json(deliveryProblems);
+    } catch (error) {
+      return res.status(400).json({ error: 'Error in database' });
+    }
+  }
+
+  async delete(req, res) {
+    try {
+      // const deliveryId = req.params.delivery_id;
+      const request = req.body;
+      request.delivery_problem_id = req.params.delivery_problem_id;
+
+      const schema = Yup.object().shape({
+        delivery_problem_id: Yup.number().required(),
+        canceled_at: Yup.date().required(),
+      });
+
+      if (!(await schema.isValid(request))) {
+        return res.status(400).json({ error: 'Validation fails.' });
+      }
+
+      // Validation: delivery problem exists?
+      const deliveryProblem = await DeliveryProblem.findByPk(
+        request.delivery_problem_id
+      );
+
+      if (!deliveryProblem) {
+        return res.status(400).json({ error: 'Delivery problem not found' });
+      }
+
+      // Validation: delivery exists
+      const delivery = await Delivery.findByPk(deliveryProblem.delivery_id);
+
+      if (!delivery) {
+        return res.status(400).json({ error: 'delivery not found' });
+      }
+
+      // Validation: delivery is not canceled or ended
+      if (delivery.canceled_at !== null || delivery.end_date !== null) {
+        return res.json({ advise: 'This delivery is finished.' });
+      }
+
+      await delivery.update(req.body);
+
+      return res.json(delivery);
+    } catch (error) {
+      return res.status(400).json({ error: 'Database error.' });
     }
   }
 }

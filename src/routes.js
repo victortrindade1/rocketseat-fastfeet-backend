@@ -32,6 +32,7 @@ routes.get(
   DeliveryProblemController.index
 );
 routes.post('/delivery/:delivery_id/problems', DeliveryProblemController.store);
+routes.get('/delivery/:delivery_id/problems', DeliveryProblemController.show);
 
 /**
  * Status do delivery
@@ -82,5 +83,14 @@ routes.get('/deliveries', DeliveryController.index);
 routes.post('/deliveries', DeliveryController.store);
 routes.delete('/deliveries/:id', DeliveryController.delete);
 routes.put('/deliveries/:id', DeliveryController.update);
+
+/**
+ * Cancelar encomenda usando id do problema
+ * Models: [DeliveryProblem, Delivery]
+ */
+routes.delete(
+  '/problem/:delivery_problem_id/cancel-delivery',
+  DeliveryProblemController.delete
+);
 
 export default routes;
