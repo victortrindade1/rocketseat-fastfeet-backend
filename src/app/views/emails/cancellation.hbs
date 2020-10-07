@@ -1,0 +1,23 @@
+<h3>Cancelamento de Entrega</h3>
+<strong>Olá, {{ deliveryman }}</strong>
+<p>Houve um <strong>CANCELAMENTO</strong> de entrega. Confira os detalhes abaixo:</p>
+<p>
+  {{!-- Detalhes do produto --}}
+  <small>
+    Detalhes do produto
+  </small>
+  <br />
+  <strong>Produto: </strong> {{ product }} <br />
+  <strong>Data de abertura: </strong> {{ startDate }} <br />
+  <strong>Data de cancelamento: </strong> {{ cancelDate }} <br />
+  <br />
+  {{!-- Detalhes do endereço --}}
+  <small>
+    Detalhes do endereço
+  </small>
+  <br />
+  <strong>Endereço: </strong> {{ street }}, {{ number }}, {{ city }} - {{ state }}, {{ country }} <br />
+  <strong>CEP: </strong> {{ zipcode }} <br />
+  <strong>Destinatário: </strong> {{ name }} <br />
+  <br />
+</p>

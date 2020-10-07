@@ -4,6 +4,8 @@
 import * as Yup from 'yup';
 import { Op } from 'sequelize';
 
+import Mail from '../../lib/Mail';
+
 import Delivery from '../models/Delivery';
 import DeliveryProblem from '../models/DeliveryProblem';
 import Deliveryman from '../models/Deliveryman';
@@ -162,18 +164,65 @@ class DeliveryProblemController {
       }
 
       // Validation: delivery exists
-      const delivery = await Delivery.findByPk(deliveryProblem.delivery_id);
+      // const delivery = await Delivery.findByPk(deliveryProblem.delivery_id);
+      const delivery = await Delivery.findOne({
+        where: {
+          id: deliveryProblem.delivery_id,
+        },
+        // Include Recipient to send e-mail
+        include: [
+          {
+            model: Recipient,
+            as: 'recipient',
+          },
+        ],
+      });
 
       if (!delivery) {
         return res.status(400).json({ error: 'delivery not found' });
       }
 
-      // Validation: delivery is not canceled or ended
-      if (delivery.canceled_at !== null || delivery.end_date !== null) {
-        return res.json({ advise: 'This delivery is finished.' });
+      // Validation: delivery is closed
+      if (
+        (delivery.canceled_at !== null || delivery.end_date !== null) &&
+        delivery.start_date !== null
+      ) {
+        return res.status(400).json({ error: 'This delivery is closed.' });
       }
 
+      /**
+       * Poderia apenas dar um valor pra delivery.canceled_at e em vez de fazer
+       * update, faria um save. Assim:
+       * delivery.canceled_at = req.body.canceled_at;
+       * await delivery.save();
+       * */
       await delivery.update(req.body);
+
+      // Send mail to deliveryman
+      const deliveryman = await Deliveryman.findByPk(delivery.deliveryman_id);
+
+      if (!deliveryman) {
+        return res.status(400).json({ error: 'Deliveryman not found' });
+      }
+
+      await Mail.sendMail({
+        to: `${deliveryman.name} <${deliveryman.email}>`,
+        subject: 'Encomenda cancelada',
+        template: 'newDelivery',
+        context: {
+          deliveryman: deliveryman.name,
+          product: delivery.product,
+          zipcode: delivery.recipient.zipcode,
+          street: delivery.recipient.street,
+          number: delivery.recipient.number,
+          city: delivery.recipient.city,
+          state: delivery.recipient.state,
+          country: delivery.recipient.country,
+          complement: delivery.recipient.complement,
+          name: delivery.recipient.name,
+          phone: delivery.recipient.phone,
+        },
+      });
 
       return res.json(delivery);
     } catch (error) {

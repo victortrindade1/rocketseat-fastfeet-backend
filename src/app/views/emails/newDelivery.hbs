@@ -1,0 +1,23 @@
+<h3>Nova Encomenda!</h3>
+<strong>Olá, {{ deliveryman }}</strong>
+<p>Existe uma <strong>nova encomenda</strong> para ser entregue!</p>
+<p>
+  {{!-- Detalhes do produto --}}
+  <small>
+    Detalhes do produto
+  </small>
+  <br />
+  <strong>Produto: </strong> {{ product }} <br />
+  <br />
+  {{!-- Detalhes do endereço --}}
+  <small>
+    Detalhes do endereço
+  </small>
+  <br />
+  <strong>CEP: </strong> {{ zipcode }} <br />
+  <strong>Endereço: </strong> {{ street }}, {{ number }}, {{ city }} - {{ state }}, {{ country }} <br />
+  <strong>Complemento: </strong> {{ complement }} <br />
+  <strong>Destinatário: </strong> {{ name }} <br />
+  <strong>Contato Destinatário: </strong> {{ phone }} <br />
+  <br />
+</p>

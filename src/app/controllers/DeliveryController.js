@@ -2,6 +2,9 @@
  * Gestão de deliveries (Encomendas) - CRUD
  */
 import * as Yup from 'yup';
+
+import Mail from '../../lib/Mail';
+
 import Delivery from '../models/Delivery';
 import Recipient from '../models/Recipient';
 import Deliveryman from '../models/Deliveryman';
@@ -57,13 +60,11 @@ class DeliveryController {
       }
 
       // Check if recipient and deliveryman exists
-      const recipientExists = await Recipient.findByPk(req.body.recipient_id);
+      const recipient = await Recipient.findByPk(req.body.recipient_id);
 
-      const deliverymanExists = await Deliveryman.findByPk(
-        req.body.deliveryman_id
-      );
+      const deliveryman = await Deliveryman.findByPk(req.body.deliveryman_id);
 
-      if (!(recipientExists || deliverymanExists)) {
+      if (!(recipient || deliveryman)) {
         return res
           .status(400)
           .json({ error: 'Recipient and/or Deliveryman do not exist.' });
@@ -75,6 +76,25 @@ class DeliveryController {
         recipient_id,
         deliveryman_id,
       } = await Delivery.create(req.body);
+
+      await Mail.sendMail({
+        to: `${deliveryman.name} <${deliveryman.email}>`,
+        subject: 'Há uma nova encomenda para ser entregue!',
+        template: 'newDelivery',
+        context: {
+          deliveryman: deliveryman.name,
+          product,
+          zipcode: recipient.zipcode,
+          street: recipient.street,
+          number: recipient.number,
+          city: recipient.city,
+          state: recipient.state,
+          country: recipient.country,
+          complement: recipient.complement,
+          name: recipient.name,
+          phone: recipient.phone,
+        },
+      });
 
       return res.json({
         id,
