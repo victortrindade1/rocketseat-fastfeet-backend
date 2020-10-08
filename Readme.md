@@ -6,6 +6,6 @@ Falta:
 
 falta cors
 
-falta process.env
+falta process.env (to aqui)
 
-debugger de produção sentry.io
+debugger de produção sentry.io (fiz tudo. pra funcionar só preciso terminar o .env)
