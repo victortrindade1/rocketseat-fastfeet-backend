@@ -3,7 +3,9 @@
  */
 import * as Yup from 'yup';
 
-import Mail from '../../lib/Mail';
+// import Mail from '../../lib/Mail';
+import Queue from '../../lib/Queue';
+import NewDeliveryMail from '../jobs/NewDeliveryMail';
 
 import Delivery from '../models/Delivery';
 import Recipient from '../models/Recipient';
@@ -77,23 +79,10 @@ class DeliveryController {
         deliveryman_id,
       } = await Delivery.create(req.body);
 
-      await Mail.sendMail({
-        to: `${deliveryman.name} <${deliveryman.email}>`,
-        subject: 'Há uma nova encomenda para ser entregue!',
-        template: 'newDelivery',
-        context: {
-          deliveryman: deliveryman.name,
-          product,
-          zipcode: recipient.zipcode,
-          street: recipient.street,
-          number: recipient.number,
-          city: recipient.city,
-          state: recipient.state,
-          country: recipient.country,
-          complement: recipient.complement,
-          name: recipient.name,
-          phone: recipient.phone,
-        },
+      await Queue.add(NewDeliveryMail.key, {
+        deliveryman,
+        product,
+        recipient,
       });
 
       return res.json({

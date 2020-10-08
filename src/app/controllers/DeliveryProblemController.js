@@ -4,7 +4,9 @@
 import * as Yup from 'yup';
 import { Op } from 'sequelize';
 
-import Mail from '../../lib/Mail';
+// import Mail from '../../lib/Mail';
+import Queue from '../../lib/Queue';
+import CancellationMail from '../jobs/CancellationMail';
 
 import Delivery from '../models/Delivery';
 import DeliveryProblem from '../models/DeliveryProblem';
@@ -205,24 +207,29 @@ class DeliveryProblemController {
         return res.status(400).json({ error: 'Deliveryman not found' });
       }
 
-      await Mail.sendMail({
-        to: `${deliveryman.name} <${deliveryman.email}>`,
-        subject: 'Encomenda cancelada',
-        template: 'newDelivery',
-        context: {
-          deliveryman: deliveryman.name,
-          product: delivery.product,
-          zipcode: delivery.recipient.zipcode,
-          street: delivery.recipient.street,
-          number: delivery.recipient.number,
-          city: delivery.recipient.city,
-          state: delivery.recipient.state,
-          country: delivery.recipient.country,
-          complement: delivery.recipient.complement,
-          name: delivery.recipient.name,
-          phone: delivery.recipient.phone,
-        },
+      await Queue.add(CancellationMail.key, {
+        deliveryman,
+        delivery,
       });
+
+      // await Mail.sendMail({
+      //   to: `${deliveryman.name} <${deliveryman.email}>`,
+      //   subject: 'Encomenda cancelada',
+      //   template: 'newDelivery',
+      //   context: {
+      //     deliveryman: deliveryman.name,
+      //     product: delivery.product,
+      //     zipcode: delivery.recipient.zipcode,
+      //     street: delivery.recipient.street,
+      //     number: delivery.recipient.number,
+      //     city: delivery.recipient.city,
+      //     state: delivery.recipient.state,
+      //     country: delivery.recipient.country,
+      //     complement: delivery.recipient.complement,
+      //     name: delivery.recipient.name,
+      //     phone: delivery.recipient.phone,
+      //   },
+      // });
 
       return res.json(delivery);
     } catch (error) {
