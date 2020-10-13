@@ -2,6 +2,7 @@
  * Gestão de deliveries (Encomendas) - CRUD
  */
 import * as Yup from 'yup';
+import { Op } from 'sequelize';
 
 // import Mail from '../../lib/Mail';
 import Queue from '../../lib/Queue';
@@ -15,34 +16,74 @@ import Signature from '../models/Signature';
 class DeliveryController {
   async index(req, res) {
     try {
-      const { page = 1 } = req.query;
+      const { page = 1, q: productFilter } = req.query;
 
-      const delivery = await Delivery.findAll({
-        // Os campos q eu quero q mostre ficam em "attributes"
-        attributes: ['id', 'product', 'canceled_at', 'start_date', 'end_date'],
-        limit: 20,
-        offset: (page - 1) * 20,
-        order: ['id'],
-        include: [
-          {
-            model: Recipient,
-            as: 'recipient',
-            attributes: ['id', 'name'],
-          },
-          {
-            model: Deliveryman,
-            as: 'deliveryman',
-            attributes: ['id', 'name', 'email'],
-          },
-          {
-            model: Signature,
-            as: 'signature',
-            attributes: ['id', 'name', 'path', 'url'],
-          },
-        ],
-      });
+      const response = productFilter
+        ? await Delivery.findAll({
+            where: {
+              product: {
+                // Somente com "[Op.iLike]: productFilter" não acha de trás pra frente
+                [Op.iLike]: `${productFilter}%`,
+              },
+            },
+            order: ['id'],
+            attributes: [
+              'id',
+              'product',
+              'start_date',
+              'end_date',
+              'canceled_at',
+            ],
+            include: [
+              {
+                model: Recipient,
+                as: 'recipient',
+                attributes: ['id', 'name'],
+              },
+              {
+                model: Deliveryman,
+                as: 'deliveryman',
+                attributes: ['id', 'name', 'email'],
+              },
+              {
+                model: Signature,
+                as: 'signature',
+                attributes: ['id', 'name', 'path', 'url'],
+              },
+            ],
+          })
+        : await Delivery.findAll({
+            // Os campos q eu quero q mostre ficam em "attributes"
+            attributes: [
+              'id',
+              'product',
+              'canceled_at',
+              'start_date',
+              'end_date',
+            ],
+            limit: 20,
+            offset: (page - 1) * 20,
+            order: ['id'],
+            include: [
+              {
+                model: Recipient,
+                as: 'recipient',
+                attributes: ['id', 'name'],
+              },
+              {
+                model: Deliveryman,
+                as: 'deliveryman',
+                attributes: ['id', 'name', 'email'],
+              },
+              {
+                model: Signature,
+                as: 'signature',
+                attributes: ['id', 'name', 'path', 'url'],
+              },
+            ],
+          });
 
-      return res.json(delivery);
+      return res.json(response);
     } catch (error) {
       return res.status(400).json({ error: 'Error in database.' });
     }

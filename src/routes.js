@@ -55,6 +55,9 @@ routes.use(authMiddleware);
  */
 routes.post('/recipients', RecipientController.store);
 routes.put('/recipients/:id', RecipientController.update);
+routes.delete('/recipients/:id', RecipientController.destroy);
+routes.get('/recipients', RecipientController.index);
+routes.get('/recipients/:id', RecipientController.show);
 
 /**
  * Entregadores (Deliverymen)
@@ -64,6 +67,7 @@ routes.get('/deliverymen', DeliverymanController.index);
 routes.post('/deliverymen', DeliverymanController.store);
 routes.delete('/deliverymen/:id', DeliverymanController.delete);
 routes.put('/deliverymen/:id', DeliverymanController.update);
+routes.get('/deliverymen/:id', DeliverymanController.show);
 
 /**
  * Avatar de Entregadores
