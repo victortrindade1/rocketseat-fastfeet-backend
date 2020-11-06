@@ -11,6 +11,7 @@ import NewDeliveryMail from '../jobs/NewDeliveryMail';
 import Delivery from '../models/Delivery';
 import Recipient from '../models/Recipient';
 import Deliveryman from '../models/Deliveryman';
+import DeliverymanAvatar from '../models/DeliverymanAvatar';
 import Signature from '../models/Signature';
 
 class DeliveryController {
@@ -68,12 +69,29 @@ class DeliveryController {
               {
                 model: Recipient,
                 as: 'recipient',
-                attributes: ['id', 'name'],
+                attributes: [
+                  'id',
+                  'name',
+                  'phone',
+                  'street',
+                  'number',
+                  'complement',
+                  'state',
+                  'city',
+                  'zipcode',
+                ],
               },
               {
                 model: Deliveryman,
                 as: 'deliveryman',
                 attributes: ['id', 'name', 'email'],
+                include: [
+                  {
+                    model: DeliverymanAvatar,
+                    as: 'avatar',
+                    attributes: ['id', 'path', 'url'],
+                  },
+                ],
               },
               {
                 model: Signature,
