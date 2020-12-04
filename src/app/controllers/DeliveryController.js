@@ -17,9 +17,9 @@ import Signature from '../models/Signature';
 class DeliveryController {
   async index(req, res) {
     try {
-      const { page = 1, q: productFilter } = req.query;
+      const { page = 1, q: productFilter, limit = 5 } = req.query;
 
-      const response = productFilter
+      const deliveries = productFilter
         ? await Delivery.findAll({
             where: {
               product: {
@@ -62,8 +62,8 @@ class DeliveryController {
               'start_date',
               'end_date',
             ],
-            limit: 20,
-            offset: (page - 1) * 20,
+            limit,
+            offset: (page - 1) * limit,
             order: ['id'],
             include: [
               {
@@ -101,7 +101,13 @@ class DeliveryController {
             ],
           });
 
-      return res.json(response);
+      const totalDeliveries = await Delivery.count();
+
+      return res.json({
+        items: deliveries,
+        total: totalDeliveries,
+        pages: Math.ceil(totalDeliveries / limit),
+      });
     } catch (error) {
       return res.status(400).json({ error: 'Error in database.' });
     }

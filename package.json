@@ -40,6 +40,7 @@
     "dev:debug": "nodemon --inspect src/server.js",
     "postgres": "docker start database",
     "redis": "docker start redis-fastfeet",
-    "queue": "nodemon src/queue.js"
+    "queue": "nodemon src/queue.js",
+    "dev-start": "yarn postgres && yarn redis && yarn dev"
   }
 }

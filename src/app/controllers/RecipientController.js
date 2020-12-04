@@ -129,7 +129,7 @@ class RecipientController {
             'complement',
             'state',
             'city',
-            'zip_code',
+            'zipcode',
           ],
         })
       : await Recipient.findAll({
@@ -141,10 +141,10 @@ class RecipientController {
             'complement',
             'state',
             'city',
-            'zip_code',
+            'zipcode',
           ],
-          limit: 5,
-          offset: (page - 1) * 5,
+          limit: 300,
+          offset: (page - 1) * 300,
         });
 
     return res.json(response);
