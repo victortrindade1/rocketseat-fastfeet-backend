@@ -18,92 +18,58 @@ class DeliveryController {
   async index(req, res) {
     try {
       const { page = 1, q: productFilter, limit = 5 } = req.query;
+      const where = {};
 
-      const deliveries = productFilter
-        ? await Delivery.findAll({
-            where: {
-              product: {
-                // Somente com "[Op.iLike]: productFilter" não acha de trás pra frente
-                [Op.iLike]: `${productFilter}%`,
-              },
-            },
-            order: ['id'],
+      if (productFilter) {
+        where.product = { [Op.iLike]: `${productFilter}%` };
+      }
+
+      const totalDeliveries = await Delivery.count({ where });
+      const deliveries = await Delivery.findAll({
+        where,
+        limit,
+        offset: (page - 1) * limit,
+        order: [['id', 'DESC']],
+        attributes: ['id', 'product', 'start_date', 'end_date', 'canceled_at'],
+        include: [
+          {
+            model: Recipient,
+            as: 'recipient',
             attributes: [
               'id',
-              'product',
-              'start_date',
-              'end_date',
-              'canceled_at',
+              'name',
+              'phone',
+              'street',
+              'number',
+              'complement',
+              'state',
+              'city',
+              'zipcode',
             ],
+          },
+          {
+            model: Deliveryman,
+            as: 'deliveryman',
+            attributes: ['id', 'name', 'email'],
             include: [
               {
-                model: Recipient,
-                as: 'recipient',
-                attributes: ['id', 'name'],
-              },
-              {
-                model: Deliveryman,
-                as: 'deliveryman',
-                attributes: ['id', 'name', 'email'],
-              },
-              {
-                model: Signature,
-                as: 'signature',
-                attributes: ['id', 'name', 'path', 'url'],
+                model: DeliverymanAvatar,
+                as: 'avatar',
+                attributes: ['id', 'path', 'url'],
               },
             ],
-          })
-        : await Delivery.findAll({
-            // Os campos q eu quero q mostre ficam em "attributes"
-            attributes: [
-              'id',
-              'product',
-              'canceled_at',
-              'start_date',
-              'end_date',
-            ],
-            limit,
-            offset: (page - 1) * limit,
-            order: ['id'],
-            include: [
-              {
-                model: Recipient,
-                as: 'recipient',
-                attributes: [
-                  'id',
-                  'name',
-                  'phone',
-                  'street',
-                  'number',
-                  'complement',
-                  'state',
-                  'city',
-                  'zipcode',
-                ],
-              },
-              {
-                model: Deliveryman,
-                as: 'deliveryman',
-                attributes: ['id', 'name', 'email'],
-                include: [
-                  {
-                    model: DeliverymanAvatar,
-                    as: 'avatar',
-                    attributes: ['id', 'path', 'url'],
-                  },
-                ],
-              },
-              {
-                model: Signature,
-                as: 'signature',
-                attributes: ['id', 'name', 'path', 'url'],
-              },
-            ],
-          });
-
-      const totalDeliveries = await Delivery.count();
+          },
+          {
+            model: Signature,
+            as: 'signature',
+            attributes: ['id', 'name', 'path', 'url'],
+          },
+        ],
+      });
 
       return res.json({
+        limit,
+        page: Number(page),
         items: deliveries,
         total: totalDeliveries,
         pages: Math.ceil(totalDeliveries / limit),
