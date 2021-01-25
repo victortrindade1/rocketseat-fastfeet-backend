@@ -13,6 +13,7 @@ import Recipient from '../models/Recipient';
 import Deliveryman from '../models/Deliveryman';
 import DeliverymanAvatar from '../models/DeliverymanAvatar';
 import Signature from '../models/Signature';
+import DeliveryProblem from '../models/DeliveryProblem';
 
 class DeliveryController {
   async index(req, res) {
@@ -204,6 +205,58 @@ class DeliveryController {
     } catch (err) {
       return res.status(400).json({ error: 'Error in update' });
     }
+  }
+
+  async show(req, res) {
+    const { id } = req.params;
+
+    const delivery = await Delivery.findByPk(id, {
+      attributes: ['id', 'product', 'canceled_at', 'start_date', 'end_date'],
+      include: [
+        {
+          model: Recipient,
+          as: 'recipient',
+          attributes: [
+            'id',
+            'name',
+            'street',
+            'number',
+            'complement',
+            'state',
+            'city',
+            'zipcode',
+          ],
+        },
+        {
+          model: Deliveryman,
+          as: 'deliveryman',
+          attributes: ['id', 'name', 'email'],
+          include: [
+            {
+              model: DeliverymanAvatar,
+              as: 'avatar',
+              attributes: ['name', 'path', 'url'],
+            },
+          ],
+        },
+        {
+          model: Signature,
+          as: 'signature',
+          attributes: ['name', 'path', 'url'],
+        },
+        {
+          model: DeliveryProblem,
+          as: 'problems',
+          attributes: ['id', 'description', 'createdAt'],
+        },
+      ],
+    });
+
+    if (!delivery) {
+      return res.status(400).json({ error: 'Delivery does not exists' });
+    }
+
+    return res.json(delivery);
   }
 }
 

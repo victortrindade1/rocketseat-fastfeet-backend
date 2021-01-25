@@ -10,6 +10,7 @@ import DeliverymanController from './app/controllers/DeliverymanController';
 import DeliveryController from './app/controllers/DeliveryController';
 import StatusDeliveryController from './app/controllers/StatusDeliveryController';
 import DeliveryProblemController from './app/controllers/DeliveryProblemController';
+import DeliverySignatureController from './app/controllers/DeliverySignatureController';
 
 import authMiddleware from './app/middlewares/auth';
 
@@ -33,6 +34,16 @@ routes.get(
 );
 routes.post('/delivery/:delivery_id/problems', DeliveryProblemController.store);
 routes.get('/delivery/:delivery_id/problems', DeliveryProblemController.show);
+
+/**
+ * Signature do delivery
+ * Model: Signature
+ */
+routes.post(
+  '/delivery/signature',
+  upload.single('file'),
+  DeliverySignatureController.store
+);
 
 /**
  * Status do delivery
@@ -87,6 +98,7 @@ routes.get('/deliveries', DeliveryController.index);
 routes.post('/deliveries', DeliveryController.store);
 routes.delete('/deliveries/:id', DeliveryController.delete);
 routes.put('/deliveries/:id', DeliveryController.update);
+routes.get('/deliveries/:id', DeliveryController.show);
 
 /**
  * Cancelar encomenda usando id do problema
