@@ -52,7 +52,7 @@ class DeliveryProblemController {
       });
     } catch (error) {
       return res.status(400).json({
-        error: 'Error in database. Sorry.',
+        error: 'Error in database. Sorryy.',
         // description: error.message,
       });
     }
@@ -60,15 +60,15 @@ class DeliveryProblemController {
 
   async index(req, res) {
     try {
-      // Eu poderia fazer dinâmico com filtro de deliveries opened e closed
-      // List all deliveries that have problem
+      const { page = 1, limit = 5 } = req.query;
 
-      const { page = 1 } = req.query;
+      const totalProblems = await DeliveryProblem.count();
 
       const deliveriesProblems = await DeliveryProblem.findAll({
         attributes: ['id', 'description'],
-        limit: 20,
-        offset: (page - 1) * 20,
+        limit,
+        offset: (page - 1) * limit,
+        order: [['id', 'DESC']],
         include: [
           {
             model: Delivery,
@@ -95,17 +95,23 @@ class DeliveryProblemController {
         ],
       });
 
-      if (
-        // If Empty Array
-        typeof deliveriesProblems !== 'undefined' &&
-        deliveriesProblems.length === 0
-      ) {
-        return res.json({ message: ' No deliveries with problems found' });
-      }
+      // if (
+      //   // If Empty Array
+      //   typeof deliveriesProblems !== 'undefined' &&
+      //   deliveriesProblems.length === 0
+      // ) {
+      //   return res.json({ message: ' No deliveries with problems found' });
+      // }
 
-      return res.status(200).json(deliveriesProblems);
+      return res.status(200).json({
+        limit,
+        page: Number(page),
+        items: deliveriesProblems,
+        total: totalProblems,
+        pages: Math.ceil(totalProblems / limit),
+      });
     } catch (error) {
-      return res.status(400).json({ error: 'Database error' });
+      return res.status(400).json({ error: error.description });
     }
   }
 

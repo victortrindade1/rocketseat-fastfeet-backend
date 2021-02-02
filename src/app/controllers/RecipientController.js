@@ -112,42 +112,43 @@ class RecipientController {
   }
 
   async index(req, res) {
-    const { q: recipientName, page = 1 } = req.query;
+    try {
+      const { q: recipientName, page = 1, limit = 5 } = req.query;
+      const where = {};
 
-    const response = recipientName
-      ? await Recipient.findAll({
-          where: {
-            name: {
-              [Op.iLike]: `${recipientName}%`,
-            },
-          },
-          attributes: [
-            'id',
-            'name',
-            'street',
-            'number',
-            'complement',
-            'state',
-            'city',
-            'zipcode',
-          ],
-        })
-      : await Recipient.findAll({
-          attributes: [
-            'id',
-            'name',
-            'street',
-            'number',
-            'complement',
-            'state',
-            'city',
-            'zipcode',
-          ],
-          limit: 300,
-          offset: (page - 1) * 300,
-        });
+      if (recipientName) {
+        where.name = { [Op.iLike]: `${recipientName}%` };
+      }
 
-    return res.json(response);
+      const totalRecipients = await Recipient.count({ where });
+
+      const recipients = await Recipient.findAll({
+        where,
+        limit,
+        offset: (page - 1) * limit,
+        order: [['id', 'DESC']],
+        attributes: [
+          'id',
+          'name',
+          'street',
+          'number',
+          'complement',
+          'state',
+          'city',
+          'zipcode',
+        ],
+      });
+
+      return res.json({
+        limit,
+        page: Number(page),
+        items: recipients,
+        total: totalRecipients,
+        pages: Math.ceil(totalRecipients / limit),
+      });
+    } catch (error) {
+      return res.status(400).json({ error: 'Error in database.' });
+    }
   }
 
   async show(req, res) {

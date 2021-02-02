@@ -11,41 +11,69 @@ import DeliverymanAvatar from '../models/DeliverymanAvatar';
 class DeliverymanController {
   async index(req, res) {
     try {
-      const { page = 1, q: deliverymanFilter } = req.query;
+      const { page = 1, q: deliverymanFilter, limit = 5 } = req.query;
+      const where = {};
 
-      const response = deliverymanFilter
-        ? await Deliveryman.findAll({
-            where: {
-              name: {
-                [Op.iLike]: `${deliverymanFilter}%`,
-              },
-            },
-            attributes: ['id', 'name', 'email'],
-            order: ['id'],
-            include: [
-              {
-                model: DeliverymanAvatar,
-                as: 'avatar',
-                attributes: ['id', 'path', 'url'],
-              },
-            ],
-          })
-        : await Deliveryman.findAll({
-            // Os campos q eu quero q mostre ficam em "attributes"
-            attributes: ['id', 'name', 'email'],
-            order: ['id'],
-            limit: 20,
-            offset: (page - 1) * 20,
-            include: [
-              {
-                model: DeliverymanAvatar,
-                as: 'avatar',
-                attributes: ['id', 'path', 'url'],
-              },
-            ],
-          });
+      if (deliverymanFilter) {
+        where.name = { [Op.iLike]: `${deliverymanFilter}%` };
+      }
 
-      return res.json(response);
+      const totalDeliverymen = await Deliveryman.count({ where });
+
+      const deliverymen = await Deliveryman.findAll({
+        where,
+        limit,
+        offset: (page - 1) * limit,
+        order: [['id', 'DESC']],
+        attributes: ['id', 'name', 'email'],
+        include: [
+          {
+            model: DeliverymanAvatar,
+            as: 'avatar',
+            attributes: ['id', 'path', 'url'],
+          },
+        ],
+      });
+
+      // const response = deliverymanFilter
+      //   ? await Deliveryman.findAll({
+      //       where: {
+      //         name: {
+      //           [Op.iLike]: `${deliverymanFilter}%`,
+      //         },
+      //       },
+      //       attributes: ['id', 'name', 'email'],
+      //       order: ['id'],
+      //       include: [
+      //         {
+      //           model: DeliverymanAvatar,
+      //           as: 'avatar',
+      //           attributes: ['id', 'path', 'url'],
+      //         },
+      //       ],
+      //     })
+      //   : await Deliveryman.findAll({
+      //       // Os campos q eu quero q mostre ficam em "attributes"
+      //       attributes: ['id', 'name', 'email'],
+      //       order: ['id'],
+      //       limit: 20,
+      //       offset: (page - 1) * 20,
+      //       include: [
+      //         {
+      //           model: DeliverymanAvatar,
+      //           as: 'avatar',
+      //           attributes: ['id', 'path', 'url'],
+      //         },
+      //       ],
+      //     });
+
+      return res.json({
+        limit,
+        page: Number(page),
+        items: deliverymen,
+        total: totalDeliverymen,
+        pages: Math.ceil(totalDeliverymen / limit),
+      });
     } catch (error) {
       return res.status(400).json({ error: 'Error in database.' });
     }

@@ -31,10 +31,6 @@ class Delivery extends Model {
       foreignKey: 'signature_id',
       as: 'signature',
     });
-    this.belongsTo(models.DeliveryProblem, {
-      foreignKey: 'problem_id',
-      as: 'problems',
-    });
   }
 }
 
