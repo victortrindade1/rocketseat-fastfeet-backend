@@ -4,7 +4,7 @@
 import * as Yup from 'yup';
 import { Op } from 'sequelize';
 
-import Delivery from '../models/Delivery';
+// import Delivery from '../models/Delivery';
 import Deliveryman from '../models/Deliveryman';
 import DeliverymanAvatar from '../models/DeliverymanAvatar';
 
@@ -34,38 +34,6 @@ class DeliverymanController {
           },
         ],
       });
-
-      // const response = deliverymanFilter
-      //   ? await Deliveryman.findAll({
-      //       where: {
-      //         name: {
-      //           [Op.iLike]: `${deliverymanFilter}%`,
-      //         },
-      //       },
-      //       attributes: ['id', 'name', 'email'],
-      //       order: ['id'],
-      //       include: [
-      //         {
-      //           model: DeliverymanAvatar,
-      //           as: 'avatar',
-      //           attributes: ['id', 'path', 'url'],
-      //         },
-      //       ],
-      //     })
-      //   : await Deliveryman.findAll({
-      //       // Os campos q eu quero q mostre ficam em "attributes"
-      //       attributes: ['id', 'name', 'email'],
-      //       order: ['id'],
-      //       limit: 20,
-      //       offset: (page - 1) * 20,
-      //       include: [
-      //         {
-      //           model: DeliverymanAvatar,
-      //           as: 'avatar',
-      //           attributes: ['id', 'path', 'url'],
-      //         },
-      //       ],
-      //     });
 
       return res.json({
         limit,
@@ -179,40 +147,22 @@ class DeliverymanController {
       }
 
       // Validation: deliveryman exists
-      const deliverymanExists = await Deliveryman.findByPk(id);
-
-      if (!deliverymanExists) {
-        return res.status(400).json({ error: 'Deliveryman does not exist.' });
-      }
-
-      const deliveries = await Delivery.findAll({
-        where: {
-          deliveryman_id: id,
-          canceled_at: {
-            [Op.is]: null,
-          },
-          end_date: {
-            [Op.is]: null,
-          },
-        },
-        attributes: ['id', 'product', 'start_date'],
+      const deliveryman = await Deliveryman.findByPk(id, {
+        attributes: ['id', 'name', 'email'],
         include: [
           {
-            model: Deliveryman,
-            as: 'deliveryman',
-            attributes: ['id', 'name', 'email'],
-            include: [
-              {
-                model: DeliverymanAvatar,
-                as: 'avatar',
-                attributes: ['id', 'path', 'url'],
-              },
-            ],
+            model: DeliverymanAvatar,
+            as: 'avatar',
+            attributes: ['id', 'path', 'url'],
           },
         ],
       });
 
-      return res.status(200).json(deliveries);
+      if (!deliveryman) {
+        return res.status(400).json({ error: 'Deliveryman does not exist.' });
+      }
+
+      return res.status(200).json(deliveryman);
     } catch (error) {
       return res.status(400).json({ error: 'Error in database' });
     }

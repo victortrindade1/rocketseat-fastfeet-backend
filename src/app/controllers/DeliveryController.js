@@ -244,11 +244,6 @@ class DeliveryController {
           as: 'signature',
           attributes: ['name', 'path', 'url'],
         },
-        {
-          model: DeliveryProblem,
-          as: 'problems',
-          attributes: ['id', 'description', 'createdAt'],
-        },
       ],
     });
 
