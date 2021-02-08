@@ -4,7 +4,7 @@
 import * as Yup from 'yup';
 import { Op } from 'sequelize';
 
-// import Delivery from '../models/Delivery';
+import Delivery from '../models/Delivery';
 import Deliveryman from '../models/Deliveryman';
 import DeliverymanAvatar from '../models/DeliverymanAvatar';
 
@@ -91,8 +91,21 @@ class DeliverymanController {
         return res.status(400).json({ error: 'Deliveryman does not exist.' });
       }
 
+      // Verifica se possui entrega a fazer
+      const delivery = await Delivery.findOne({
+        where: { deliveryman_id: id, end_date: null },
+      });
+
+      if (delivery) {
+        return res
+          .status(400)
+          .json({ error: 'This Deliveryman cannot be deleted' });
+      }
+
       // Poderia, em vez de destruir, criar uma coluna com canceled_at
       await Deliveryman.destroy({ where: { id } });
+      // ou
+      // await deliveryman.destroy();
 
       return res
         .status(200)
