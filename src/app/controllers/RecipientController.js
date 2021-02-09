@@ -12,7 +12,6 @@ class RecipientController {
     // Validação: body do request
     const schema = Yup.object().shape({
       name: Yup.string().required(),
-      phone: Yup.string().required(),
       street: Yup.string().required(),
       number: Yup.string().required(),
       complement: Yup.string().notRequired(),
@@ -25,20 +24,10 @@ class RecipientController {
       return res.status(400).json({ error: 'Validation fails' });
     }
 
-    const {
-      name,
-      phone,
-      street,
-      number,
-      complement,
-      state,
-      city,
-      zipcode,
-    } = req.body;
+    const { name, street, number, complement, state, city, zipcode } = req.body;
 
     const { id } = await Recipient.create({
       name,
-      phone,
       street,
       number,
       complement,
@@ -50,7 +39,6 @@ class RecipientController {
     return res.json({
       id,
       name,
-      phone,
       street,
       number,
       complement,
@@ -65,7 +53,7 @@ class RecipientController {
     const schema = Yup.object().shape({
       id: Yup.number().required(),
       name: Yup.string(),
-      phone: Yup.string(),
+      // phone: Yup.string(),
       street: Yup.string(),
       number: Yup.string(),
       complement: Yup.string(),
@@ -74,7 +62,10 @@ class RecipientController {
       zipcode: Yup.string(),
     });
 
-    if (!(await schema.isValid(req.body))) {
+    const request = req.body;
+    request.id = req.params.id;
+
+    if (!(await schema.isValid(request))) {
       return res.status(400).json({ error: 'validation fails' });
     }
 
@@ -86,20 +77,10 @@ class RecipientController {
       return res.status(400).json({ error: 'Recipient not found' });
     }
 
-    const {
-      name,
-      phone,
-      street,
-      number,
-      complement,
-      state,
-      city,
-      zipcode,
-    } = req.body;
+    const { name, street, number, complement, state, city, zipcode } = req.body;
 
     await recipient.update({
       name,
-      phone,
       street,
       number,
       complement,
@@ -108,7 +89,7 @@ class RecipientController {
       zipcode,
     });
 
-    return res.json({});
+    return res.json(recipient);
   }
 
   async index(req, res) {
@@ -163,7 +144,7 @@ class RecipientController {
         'complement',
         'state',
         'city',
-        'zip_code',
+        'zipcode',
       ],
     });
 
