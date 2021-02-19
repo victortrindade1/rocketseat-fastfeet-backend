@@ -149,93 +149,48 @@ class DeliveryProblemController {
 
   async delete(req, res) {
     try {
-      // const deliveryId = req.params.delivery_id;
-      const request = req.body;
-      request.delivery_problem_id = req.params.delivery_problem_id;
-
-      const schema = Yup.object().shape({
-        delivery_problem_id: Yup.number().required(),
-        canceled_at: Yup.date().required(),
-      });
-
-      if (!(await schema.isValid(request))) {
-        return res.status(400).json({ error: 'Validation fails.' });
-      }
+      const deliveryProblemId = req.params.delivery_problem_id;
 
       // Validation: delivery problem exists?
-      const deliveryProblem = await DeliveryProblem.findByPk(
-        request.delivery_problem_id
-      );
+      const deliveryProblem = await DeliveryProblem.findByPk(deliveryProblemId);
 
       if (!deliveryProblem) {
         return res.status(400).json({ error: 'Delivery problem not found' });
       }
 
       // Validation: delivery exists
-      // const delivery = await Delivery.findByPk(deliveryProblem.delivery_id);
-      const delivery = await Delivery.findOne({
-        where: {
-          id: deliveryProblem.delivery_id,
-        },
-        // Include Recipient to send e-mail
+      const delivery = await Delivery.findByPk(deliveryProblem.delivery_id, {
         include: [
           {
             model: Recipient,
             as: 'recipient',
           },
+          {
+            model: Deliveryman,
+            as: 'deliveryman',
+          },
         ],
       });
 
       if (!delivery) {
-        return res.status(400).json({ error: 'delivery not found' });
+        return res.status(500).json({
+          error: 'The delivery that references this problem was not found',
+        });
       }
 
-      // Validation: delivery is closed
-      if (
-        (delivery.canceled_at !== null || delivery.end_date !== null) &&
-        delivery.start_date !== null
-      ) {
-        return res.status(400).json({ error: 'This delivery is closed.' });
-      }
-
-      /**
-       * Poderia apenas dar um valor pra delivery.canceled_at e em vez de fazer
-       * update, faria um save. Assim:
-       * delivery.canceled_at = req.body.canceled_at;
-       * await delivery.save();
-       * */
-      await delivery.update(req.body);
-
-      // Send mail to deliveryman
-      const deliveryman = await Deliveryman.findByPk(delivery.deliveryman_id);
-
-      if (!deliveryman) {
-        return res.status(400).json({ error: 'Deliveryman not found' });
-      }
-
-      await Queue.add(CancellationMail.key, {
-        deliveryman,
-        delivery,
+      const { canceled_at } = await delivery.update({
+        canceled_at: new Date(),
       });
 
-      // await Mail.sendMail({
-      //   to: `${deliveryman.name} <${deliveryman.email}>`,
-      //   subject: 'Encomenda cancelada',
-      //   template: 'newDelivery',
-      //   context: {
-      //     deliveryman: deliveryman.name,
-      //     product: delivery.product,
-      //     zipcode: delivery.recipient.zipcode,
-      //     street: delivery.recipient.street,
-      //     number: delivery.recipient.number,
-      //     city: delivery.recipient.city,
-      //     state: delivery.recipient.state,
-      //     country: delivery.recipient.country,
-      //     complement: delivery.recipient.complement,
-      //     name: delivery.recipient.name,
-      //     phone: delivery.recipient.phone,
-      //   },
-      // });
+      delivery.canceled_at = canceled_at;
+
+      await DeliveryProblem.destroy({ where: { id: deliveryProblemId } });
+
+      // Send mail to deliveryman
+      await Queue.add(CancellationMail.key, {
+        delivery,
+        deliveryProblem,
+      });
 
       return res.json(delivery);
     } catch (error) {

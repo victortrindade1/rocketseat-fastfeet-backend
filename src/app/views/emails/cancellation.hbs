@@ -1,23 +1,25 @@
 <h3>Cancelamento de Entrega</h3>
-<strong>Olá, {{ deliveryman }}</strong>
+<strong>Olá, {{deliveryman}}</strong>
 <p>Houve um <strong>CANCELAMENTO</strong> de entrega. Confira os detalhes abaixo:</p>
+<br />
+{{!-- Detalhes do produto --}}
+<small>
+  Detalhes do produto
+</small>
+<br />
 <p>
-  {{!-- Detalhes do produto --}}
-  <small>
-    Detalhes do produto
-  </small>
-  <br />
-  <strong>Produto: </strong> {{ product }} <br />
-  <strong>Data de abertura: </strong> {{ startDate }} <br />
-  <strong>Data de cancelamento: </strong> {{ cancelDate }} <br />
-  <br />
-  {{!-- Detalhes do endereço --}}
-  <small>
-    Detalhes do endereço
-  </small>
-  <br />
-  <strong>Endereço: </strong> {{ street }}, {{ number }}, {{ city }} - {{ state }}, {{ country }} <br />
-  <strong>CEP: </strong> {{ zipcode }} <br />
-  <strong>Destinatário: </strong> {{ name }} <br />
-  <br />
+  <strong>Entrega: </strong> {{product}} <br />
+  <strong>Destinatário: </strong> {{recipient}} <br />
+  <strong>Endereço: </strong> {{street}}, {{number}}, {{city}} - {{state}}, {{country}} <br />
+  <strong>Complemento: </strong> {{complement}} <br />
+  <strong>CEP: </strong> {{zipcode}} <br />
+</p>
+<br />
+<p>
+  <strong>Data/hora de cancelamento:</strong> {{date}} <br />
+</p>
+<br />
+<p>
+  <strong>Motivo:</strong> {{description}}
+</p>
 </p>
