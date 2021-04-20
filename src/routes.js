@@ -11,6 +11,7 @@ import DeliveryController from './app/controllers/DeliveryController';
 import StatusDeliveryController from './app/controllers/StatusDeliveryController';
 import DeliveryProblemController from './app/controllers/DeliveryProblemController';
 import DeliverySignatureController from './app/controllers/DeliverySignatureController';
+import MobileDeliveryController from './app/controllers/MobileDeliveryController';
 
 import authMiddleware from './app/middlewares/auth';
 
@@ -53,10 +54,14 @@ routes.post('/delivery/:id', StatusDeliveryController.store); // Retirada
 routes.put('/delivery/:id', StatusDeliveryController.update); // Entrega
 
 /**
- * Visualizar encomendas
- * Model: Deliveryman
+ * App dos Deliverymen
+ * Models: [Deliveryman, Delivery]
  */
-routes.get('/deliverymen/:id/deliveries', DeliverymanController.show);
+routes.get('/mobile/deliverymen/:id/', DeliverymanController.show);
+routes.get(
+  '/mobile/deliverymen/:id/deliveries',
+  MobileDeliveryController.index
+);
 
 routes.use(authMiddleware);
 

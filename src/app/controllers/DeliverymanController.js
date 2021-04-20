@@ -161,7 +161,7 @@ class DeliverymanController {
 
       // Validation: deliveryman exists
       const deliveryman = await Deliveryman.findByPk(id, {
-        attributes: ['id', 'name', 'email'],
+        attributes: ['id', 'name', 'email', 'created_at'],
         include: [
           {
             model: DeliverymanAvatar,

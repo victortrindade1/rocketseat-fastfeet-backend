@@ -13,12 +13,13 @@ import Recipient from '../models/Recipient';
 import Deliveryman from '../models/Deliveryman';
 import DeliverymanAvatar from '../models/DeliverymanAvatar';
 import Signature from '../models/Signature';
-import DeliveryProblem from '../models/DeliveryProblem';
+// import DeliveryProblem from '../models/DeliveryProblem';
 
 class DeliveryController {
   async index(req, res) {
     try {
       const { page = 1, q: productFilter, limit = 5 } = req.query;
+
       const where = {};
 
       if (productFilter) {
@@ -31,7 +32,14 @@ class DeliveryController {
         limit,
         offset: (page - 1) * limit,
         order: [['id', 'DESC']],
-        attributes: ['id', 'product', 'start_date', 'end_date', 'canceled_at'],
+        attributes: [
+          'id',
+          'product',
+          'start_date',
+          'end_date',
+          'canceled_at',
+          'created_at',
+        ],
         include: [
           {
             model: Recipient,
